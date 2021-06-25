@@ -14,10 +14,11 @@ func init() {
 
 func Load(isLocal bool) {
 	if isLocal { // 使用本地配置
-		viper.SetConfigFile("local.yaml")
+		viper.SetConfigName("local")
 		viper.SetConfigType("yaml")
+		viper.AddConfigPath(".")
 		if err := viper.ReadInConfig(); err != nil {
-			panic(errors.Wrap(err, "ReadInConfig failed"))
+			//panic(errors.Wrap(err, "ReadInConfig failed"))
 		}
 	}
 }
