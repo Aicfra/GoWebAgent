@@ -4,7 +4,6 @@ import (
 	"GoWebAgent/config"
 	"GoWebAgent/model"
 	"context"
-	"flag"
 	"fmt"
 	"github.com/smallnest/rpcx/server"
 	rpcx "github.com/smallnest/rpcx/server"
@@ -19,7 +18,7 @@ type RHServer struct {
 	rpcConnected bool
 	rpcConn   *net.Conn
 	rpcServer *rpcx.Server
-	rpcCallBackMap *map[string][]byte
+	rpcCallBackMap map[string][]byte
 
 	httpSvr *http.Server
 	httpConnected bool
@@ -43,6 +42,7 @@ func (s *RHServer) Mul(ctx context.Context, args *model.ReqDTO, reply *model.Res
 	c := ctx.Value(server.RemoteConnContextKey).(net.Conn)
 	s.handler.rpcServer = s.rpcServer
 	s.handler.rpcConn = &c
+	s.handler.rpcCallBackMap = &s.rpcCallBackMap
 	s.rpcConn = &c
 	reply.HttpBody = "success"
 	s.rpcConnected = true
@@ -51,7 +51,7 @@ func (s *RHServer) Mul(ctx context.Context, args *model.ReqDTO, reply *model.Res
 }
 
 func (s *RHServer) CallBack(ctx context.Context, args *model.ReqDTO, reply *model.ResDTO) error {
-	(*s.rpcCallBackMap)[args.MsgID] = args.HttpBody
+	s.rpcCallBackMap[args.MsgID] = args.HttpBody
 	reply.HttpBody = "success"
 	return nil
 }
@@ -61,11 +61,11 @@ func SerStart() {
 	rhs := RHServer{}
 	go rhs.Start()
 	//开启服务端rpc
-	flag.Parse()
 	s := server.NewServer()
+	rhs.rpcCallBackMap = make(map[string][]byte)
 	rhs.rpcServer = s
 	s.Register(&rhs, "")
-	s.Serve("tcp", "localhost:9982")
-	*rhs.rpcCallBackMap = make(map[string][]byte)
+	fmt.Printf("服务端已启动，将代理对%v的访问\n",config.Get("server_proxy_addr"))
+	s.Serve("tcp", config.Get("server_proxy_addr"))
 }
 

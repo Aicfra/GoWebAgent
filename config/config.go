@@ -18,7 +18,7 @@ func Load(isLocal bool) {
 		viper.SetConfigType("yaml")
 		viper.AddConfigPath(".")
 		if err := viper.ReadInConfig(); err != nil {
-			//panic(errors.Wrap(err, "ReadInConfig failed"))
+			panic(errors.Wrap(err, "ReadInConfig failed"))
 		}
 	}
 }

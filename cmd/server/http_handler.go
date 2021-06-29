@@ -15,10 +15,9 @@ type httpHandler struct{
 	rpcCallBackMap *map[string][]byte
 }
 
-const (
-	CLIENT    = "client"
-	SERVER    = "server"
-	errorHTML = `
+var ch = make(chan string, 50) //定义数据缓存区设置为5个大小
+
+const errorHTML = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -30,7 +29,6 @@ const (
 <h2>无客户端连接</h2>
 </body>
 </html>`
-)
 
 func (h *httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if *h.rpcConn != nil {
@@ -49,16 +47,18 @@ func (h *httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			go func() {
 				getMsged := false
 				for !getMsged {
-					if value, ok := (*h.rpcCallBackMap)[metadata["msgId"]]; ok {
-						w.Header().Set("Content-Type", "text/html; charset=utf-8")
-						w.Header().Set("X-Content-Type-Options", "nosniff")
-						w.WriteHeader(http.StatusOK)
-						w.Write(value)
-						delete(*h.rpcCallBackMap,metadata["msgId"])
+					if _, ok := (*h.rpcCallBackMap)[metadata["msgId"]]; ok {
+						ch <- metadata["msgId"]
 						getMsged = true
 					}
 				}
 			}()
+			<-ch
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			w.Header().Set("X-Content-Type-Options", "nosniff")
+			w.WriteHeader(http.StatusOK)
+			w.Write((*h.rpcCallBackMap)[metadata["msgId"]])
+			delete(*h.rpcCallBackMap,metadata["msgId"])
 		}
 	}else{
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")

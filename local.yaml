@@ -1,6 +1,6 @@
 mode: server #启动模式
-port: 8080   #服务器端口
-server_http_port: 3031
-server_addr: 127.0.0.1:50000 #服务端rpc地址
-client_addr: 127.0.0.1:3000  #客户端服务地址
-client_proxy_addr: 192.168.50.2:3128 #客户端代理地址
+port: 3001   #web管理界面端口
+server_http_port: 8080 #要代理的服务器端口，用户填写
+server_proxy_addr: localhost:9982
+client_addr: 127.0.0.1:3000  #要代理的客户端引用地址，用户填写
+client_vpn:  #客户端VPN地址 X.X.X.X:X
