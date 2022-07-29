@@ -4,4 +4,4 @@
 
 ##### 配置启动文件local.yaml
 * server_http_port是用户服务器端口
-* client_addr是客户端要转发的地址
+* client_addr是客户端要转发的地址.
